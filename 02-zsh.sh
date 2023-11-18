@@ -19,8 +19,8 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 #
 mkdir -p /home/${TARGET_USER}/.zshrc.d
 cp config/zsh/.zshrc.d/base.source /home/${TARGET_USER}/.zshrc.d/base.source
-mv /home/${TARGET_USER}/.zshrc /home/${TARGET_USER}/.zshrc.bak
-cp config/zsh/.zshrc /home/${TARGET_USER}/.zshrc
+echo "\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)" >> \
+    /home/${TARGET_USER}/.zshrc
 #
 # End
 
