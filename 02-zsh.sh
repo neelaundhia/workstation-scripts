@@ -2,7 +2,7 @@
 
 # Install ZSH
 #
-sudo apt uppdate
+sudo apt update
 sudo apt install zsh -y
 #
 # End
