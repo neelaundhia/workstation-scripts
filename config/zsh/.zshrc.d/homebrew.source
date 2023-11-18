@@ -1,1 +1,5 @@
+# Add the path for Homebrew
+#
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#
+# End
