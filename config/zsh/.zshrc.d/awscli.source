@@ -3,3 +3,9 @@
 complete -C '/usr/local/bin/aws_completer' aws
 #
 # End
+
+# Add Aliases
+#
+alias asl="aws sso login --profile"
+#
+# End
