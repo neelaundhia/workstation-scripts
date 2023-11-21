@@ -1,0 +1,8 @@
+# Add Aliases
+#
+alias k="kubectl"
+alias kc="kubectl config use-context"
+alias kk="kubectl kustomize"
+alias kka="kubectl apply -k"
+#
+# End
