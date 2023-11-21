@@ -1,7 +1,11 @@
 # Add Aliases
 #
+# Common Terminal Commands
 alias c="clear"
-alias i="unset HISTFILE"
 alias lsa="ls -lah"
+alias purge="shred -vzu -n5"
+#
+# ZSH Incognito
+alias i="unset HISTFILE"
 #
 # End
