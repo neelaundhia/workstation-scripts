@@ -1,5 +1,7 @@
 # Add Aliases
 #
+alias c="clear"
+alias i="unset HISTFILE"
 alias lsa="ls -lah"
 #
 # End
