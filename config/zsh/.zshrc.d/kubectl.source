@@ -2,7 +2,10 @@
 #
 alias k="kubectl"
 alias kc="kubectl config use-context"
+alias ka="kubectl apply"
+alias kd="kubectl delete"
 alias kk="kubectl kustomize"
 alias kka="kubectl apply -k"
+alias kkd="kubectl delete -k"
 #
 # End
