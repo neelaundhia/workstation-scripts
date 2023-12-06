@@ -13,15 +13,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 #
 # End
 
-# Configure Oh My ZSH
-#
-mkdir -p ~/.zshrc.d
-cp config/zsh/.zshrc.d/base.source ~/.zshrc.d/base.source
-echo "\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)" >> \
-    ~/.zshrc
-#
-# End
-
 # Install Special Fonts for P10K
 # Note that you will need to apply the fonts in the terminal applicationa as well as in any editors that use an integrated terminal.
 #
@@ -42,5 +33,14 @@ sed -i 's#robbyrussell#powerlevel10k/powerlevel10k#g' ~/.zshrc
 # Configure P10K
 #
 cp config/zsh/.p10k.zsh ~/.p10k.zsh
+#
+# End
+
+# Configure Oh My ZSH
+#
+mkdir -p ~/.zshrc.d
+cp config/zsh/.zshrc.d/base.source ~/.zshrc.d/base.source
+echo "\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)" >> \
+    ~/.zshrc
 #
 # End
