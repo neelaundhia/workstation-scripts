@@ -32,7 +32,7 @@ sed -i 's#robbyrussell#powerlevel10k/powerlevel10k#g' ~/.zshrc
 
 # Configure P10K
 #
-cp config/zsh/.p10k.zsh ~/.p10k.zsh
+# cp config/zsh/.p10k.zsh ~/.p10k.zsh
 #
 # End
 
