@@ -7,5 +7,7 @@ alias purge="shred -vzu -n5"
 #
 # ZSH Incognito
 alias i="unset HISTFILE"
+# git
+alias gc="git clone git@github.com:"
 #
 # End
