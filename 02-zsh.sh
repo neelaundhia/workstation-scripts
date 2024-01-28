@@ -40,7 +40,6 @@ sed -i 's#robbyrussell#powerlevel10k/powerlevel10k#g' ~/.zshrc
 #
 mkdir -p ~/.zshrc.d
 cp config/zsh/.zshrc.d/base.source ~/.zshrc.d/base.source
-echo "\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)" >> \
-    ~/.zshrc
+echo $'\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)' >>~/.zshrc
 #
 # End
