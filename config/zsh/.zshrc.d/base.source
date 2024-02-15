@@ -8,4 +8,7 @@ alias purge="shred -vzu -n5"
 # ZSH Incognito
 alias i="unset HISTFILE"
 #
+# Aliases for Git
+alias gcln="git config --local user.name"
+alias gcle="git config --local user.email"
 # End
