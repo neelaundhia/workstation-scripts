@@ -1,6 +1,6 @@
 # Add auto-completion for AWS CLI
 #
-complete -C '/usr/local/bin/aws_completer' aws
+complete -C '/home/linuxbrew/.linuxbrew/bin/aws_completer' aws
 #
 # End
 
