@@ -11,4 +11,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyr
 # Install
 sudo apt-get update && sudo apt-get install -y cloudflare-warp
 #
+# Completion
+warp-cli generate-completions zsh > ~/.oh-my-zsh/completions/_warp-cli
+#
 # End
