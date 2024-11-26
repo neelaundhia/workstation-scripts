@@ -1,6 +1,0 @@
-# Add auto-completion for Terraform
-#
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/*/bin/terraform terraform
-#
-# End
