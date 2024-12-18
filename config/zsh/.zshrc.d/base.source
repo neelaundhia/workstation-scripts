@@ -11,4 +11,9 @@ alias i="unset HISTFILE"
 # Aliases for Git
 alias gcln="git config --local user.name"
 alias gcle="git config --local user.email"
+#
+b64d() {
+  echo "$1" | base64 --decode; echo
+}
+#
 # End
