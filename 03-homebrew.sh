@@ -8,7 +8,9 @@
 
 # Configure Homebrew
 #
-sudo apt-get install build-essential gcc
+sudo apt-get install build-essential
 cp config/zsh/.zshrc.d/homebrew.source ~/.zshrc.d/homebrew.source
+source ~/.zshrc
+brew install gcc
 #
 # End
