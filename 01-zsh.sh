@@ -5,7 +5,7 @@ sudo apt update
 sudo apt install zsh -y
 
 # Install Oh My ZSH
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Set theme to fino
 sed -i 's#robbyrussell#fino#g' ~/.zshrc
@@ -14,3 +14,6 @@ sed -i 's#robbyrussell#fino#g' ~/.zshrc
 mkdir -p ~/.zshrc.d
 cp config/zsh/.zshrc.d/base.source ~/.zshrc.d/base.source
 echo $'\n# Source custom scripts from ~/.zshrc.d\nsource <(cat ~/.zshrc.d/*.source)' >>~/.zshrc
+
+# Set ZSH as default shell without prompting (optional)
+# chsh -s $(which zsh)
