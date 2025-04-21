@@ -27,6 +27,7 @@ K9S_VERSION=$(curl -s https://api.github.com/repos/derailed/k9s/releases/latest 
 
 # Create a temporary directory for download and extraction
 TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Download the binary to temp directory
 echo "Downloading k9s ${K9S_VERSION} for ${OS}/${ARCH}..."
@@ -37,9 +38,6 @@ tar -xzf $TEMP_DIR/k9s-${K9S_VERSION}.tar.gz -C $TEMP_DIR
 
 # Move the binary to its final location
 mv $TEMP_DIR/k9s ~/tools/k9s/k9s-${K9S_VERSION}
-
-# Remove temp directory and downloaded tarball
-rm -rf $TEMP_DIR
 
 # Make it executable
 chmod +x ~/tools/k9s/k9s-${K9S_VERSION}

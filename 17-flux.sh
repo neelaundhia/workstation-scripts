@@ -30,6 +30,7 @@ FLUX_VERSION=$(curl -s https://api.github.com/repos/fluxcd/flux2/releases/latest
 
 # Create a temporary directory for extraction
 TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Download the tarball
 echo "Downloading Flux ${FLUX_VERSION} for ${OS}/${ARCH}..."
@@ -40,9 +41,6 @@ tar -xzf "${TMP_DIR}/flux.tar.gz" -C "${TMP_DIR}" flux
 
 # Move the binary to the tools directory
 cp "${TMP_DIR}/flux" ~/tools/flux/flux-${FLUX_VERSION}
-
-# Clean up the temporary directory
-rm -rf "${TMP_DIR}"
 
 # Make it executable
 chmod +x ~/tools/flux/flux-${FLUX_VERSION}
