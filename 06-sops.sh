@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Create directories if they don't exist
-mkdir -p ~/tools/sops
 mkdir -p ~/bin
+mkdir -p ~/tools/sops
 
 # Get latest SOPS version
 SOPS_VERSION=$(curl -s "https://api.github.com/repos/getsops/sops/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
