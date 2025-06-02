@@ -1,0 +1,5 @@
+# Add auto-completion for AWS CLI
+complete -C '~/bin/aws_completer' aws
+
+# Add Aliases
+alias asl="aws sso login --profile"
