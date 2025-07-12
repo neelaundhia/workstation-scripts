@@ -1,0 +1,27 @@
+FROM debian:12
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        bash \
+        sudo \
+        curl \
+        unzip \
+        tar \
+        ca-certificates \
+        gnupg \
+        lsb-release \
+        git \
+        sed \
+        grep \
+        coreutils \
+        && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -ms /bin/bash tester && echo "tester ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER tester
+WORKDIR /home/tester/workspace
+
+COPY . .
+
+RUN chmod +x install.sh scripts/**/*.sh || true
+
+CMD ["bash", "install.sh", "--list"] 
