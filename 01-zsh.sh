@@ -7,8 +7,11 @@ sudo apt install zsh -y
 # Install Oh My ZSH
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-# Set theme to fino
-sed -i 's#robbyrussell#fino#g' ~/.zshrc
+# Copy tez.zsh-theme to Oh My ZSH themes directory
+cp config/zsh/themes/* ~/.oh-my-zsh/themes
+
+# Set theme to tez
+sed -i 's#robbyrussell#tez#g' ~/.zshrc
 
 # Configure ZSH
 mkdir -p ~/.zshrc.d
