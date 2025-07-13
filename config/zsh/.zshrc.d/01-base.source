@@ -1,0 +1,227 @@
+# =============================================================================
+# Base ZSH Configuration
+# =============================================================================
+# This file contains basic ZSH configuration, aliases, and functions
+# that are essential for daily development work.
+# =============================================================================
+
+# =============================================================================
+# PATH Configuration
+# =============================================================================
+# Add ~/bin to PATH if it exists
+if [[ -d "$HOME/bin" ]]; then
+    export PATH="$HOME/bin:$PATH"
+fi
+
+# Add ~/.local/bin to PATH if it exists
+if [[ -d "$HOME/.local/bin" ]]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+export EDITOR="vim"
+export VISUAL="vim"
+export PAGER="less"
+export LESS="-R"
+
+# History configuration
+export HISTSIZE=10000
+export SAVEHIST=10000
+export HISTFILE="$HOME/.zsh_history"
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+
+# =============================================================================
+# Basic Aliases
+# =============================================================================
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+# File operations
+alias c="clear"
+alias lsa="ls -lah"
+alias ll="ls -lh"
+alias la="ls -la"
+alias l="ls -CF"
+
+# Safety aliases
+alias rm="rm -i"
+alias cp="cp -i"
+alias mv="mv -i"
+alias ln="ln -i"
+
+# System utilities
+alias df="df -h"
+alias du="du -h"
+alias free="free -h"
+alias top="htop"
+
+# Network
+alias myip="curl -s https://ipinfo.io/ip"
+alias ping="ping -c 5"
+alias ports="netstat -tulanp"
+
+# =============================================================================
+# Security & Privacy
+# =============================================================================
+# Secure file deletion
+alias purge="shred -vzu -n5"
+
+# ZSH Incognito mode (no history)
+alias i="unset HISTFILE"
+
+# Clear history
+alias clearhist="history -c && history -w"
+
+# =============================================================================
+# Git Aliases
+# =============================================================================
+alias gcln="git config --local user.name"
+alias gcle="git config --local user.email"
+alias gst="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git log --oneline"
+alias gd="git diff"
+alias gco="git checkout"
+alias gcb="git checkout -b"
+alias gpl="git pull"
+alias gf="git fetch"
+
+# =============================================================================
+# Utility Functions
+# =============================================================================
+# Base64 decode
+b64d() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: b64d <base64_string>"
+        return 1
+    fi
+    echo "$1" | base64 --decode
+    echo
+}
+
+# Base64 encode
+b64e() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: b64e <string>"
+        return 1
+    fi
+    echo -n "$1" | base64
+}
+
+# Create directory and cd into it
+mkcd() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: mkcd <directory_name>"
+        return 1
+    fi
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract various archive formats
+extract() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: extract <archive_file>"
+        return 1
+    fi
+    
+    if [[ -f "$1" ]]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar e "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# Find files by name
+f() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: f <filename>"
+        return 1
+    fi
+    find . -name "*$1*" -type f
+}
+
+# Find directories by name
+fd() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: fd <dirname>"
+        return 1
+    fi
+    find . -name "*$1*" -type d
+}
+
+# Quick directory size
+dsize() {
+    if [[ -z "$1" ]]; then
+        du -sh .
+    else
+        du -sh "$1"
+    fi
+}
+
+# =============================================================================
+# Development Helpers
+# =============================================================================
+# Quick Python virtual environment
+venv() {
+    if [[ -z "$1" ]]; then
+        python3 -m venv venv
+    else
+        python3 -m venv "$1"
+    fi
+}
+
+# Activate virtual environment
+activate() {
+    if [[ -f "venv/bin/activate" ]]; then
+        source venv/bin/activate
+    elif [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate
+    else
+        echo "No virtual environment found"
+        return 1
+    fi
+}
+
+# =============================================================================
+# System Information
+# =============================================================================
+# Show system info
+sysinfo() {
+    echo "System Information:"
+    echo "=================="
+    echo "OS: $(uname -s)"
+    echo "Kernel: $(uname -r)"
+    echo "Architecture: $(uname -m)"
+    echo "Hostname: $(hostname)"
+    echo "Uptime: $(uptime)"
+    echo "Memory: $(free -h | grep Mem | awk '{print $3 "/" $2}')"
+    echo "Disk: $(df -h / | tail -1 | awk '{print $3 "/" $2 " (" $5 " used)"}')"
+}
+
+# =============================================================================
+# Load completion
+# =============================================================================
+autoload -Uz compinit
+compinit 

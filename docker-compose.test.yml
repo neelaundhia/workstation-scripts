@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  test-ubuntu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workstation-test-ubuntu
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash install.sh --list
+
+  test-debian:
+    build:
+      context: .
+      dockerfile: Dockerfile.debian
+    container_name: workstation-test-debian
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash install.sh --list
+
+  test-alpine:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: workstation-test-alpine
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash install.sh --list
+
+  test-macos-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile.macos-sim
+    container_name: workstation-test-macos-sim
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash install.sh --list

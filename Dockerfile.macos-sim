@@ -1,0 +1,60 @@
+# macOS-like environment simulation using Ubuntu
+# This simulates macOS behavior but runs on Linux kernel
+FROM ubuntu:22.04
+
+# Install dependencies including Homebrew-like tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        bash \
+        sudo \
+        curl \
+        unzip \
+        tar \
+        ca-certificates \
+        gnupg \
+        lsb-release \
+        git \
+        sed \
+        grep \
+        coreutils \
+        ruby \
+        ruby-dev \
+        build-essential \
+        && rm -rf /var/lib/apt/lists/*
+
+# Create macOS-like directory structure
+RUN mkdir -p /usr/local/bin /usr/local/lib /usr/local/include /usr/local/share
+
+# Install Homebrew (Linuxbrew) to simulate macOS package management
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+
+# Set up environment variables like macOS
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH"
+ENV HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+ENV HOMEBREW_CELLAR="/home/linuxbrew/.linuxbrew/Cellar"
+ENV HOMEBREW_REPOSITORY="/home/linuxbrew/.linuxbrew/Homebrew"
+
+# Create a user with macOS-like home directory structure
+RUN useradd -ms /bin/bash macuser && \
+    echo "macuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Set up macOS-like home directory structure
+RUN mkdir -p /home/macuser/{Applications,Library,Documents,Downloads,Desktop} && \
+    chown -R macuser:macuser /home/macuser
+
+USER macuser
+WORKDIR /home/macuser/workspace
+
+# Copy the project
+COPY --chown=macuser:macuser . .
+
+# Ensure all scripts are executable
+RUN chmod +x install.sh scripts/**/*.sh || true
+
+# Set macOS-like environment variables
+ENV HOME="/home/macuser"
+ENV USER="macuser"
+ENV SHELL="/bin/bash"
+
+# Default command: test the installer
+CMD ["bash", "install.sh", "--list"] 

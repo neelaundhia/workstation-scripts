@@ -1,0 +1,422 @@
+# =============================================================================
+# Kubernetes Tools Configuration
+# =============================================================================
+# This file contains configurations for Kubernetes ecosystem tools
+# including kubectl, Helm, Flux, and other related tools.
+# =============================================================================
+
+# =============================================================================
+# kubectl Configuration
+# =============================================================================
+if command -v kubectl >/dev/null 2>&1; then
+    # kubectl Aliases
+    alias k="kubectl"
+    alias kc="kubectl config use-context"
+    alias ka="kubectl apply"
+    alias kd="kubectl delete"
+    alias kk="kubectl kustomize"
+    alias kka="kubectl apply -k"
+    alias kkd="kubectl delete -k"
+    
+    # Common kubectl operations
+    alias kg="kubectl get"
+    alias kgp="kubectl get pods"
+    alias kgs="kubectl get services"
+    alias kgn="kubectl get nodes"
+    alias kgd="kubectl get deployments"
+    alias kgi="kubectl get ingress"
+    alias kgc="kubectl get configmaps"
+    alias kgs="kubectl get secrets"
+    
+    # kubectl describe
+    alias kdp="kubectl describe pod"
+    alias kds="kubectl describe service"
+    alias kdn="kubectl describe node"
+    alias kdd="kubectl describe deployment"
+    alias kdi="kubectl describe ingress"
+    alias kdc="kubectl describe configmap"
+    alias kds="kubectl describe secret"
+    
+    # kubectl logs
+    alias kl="kubectl logs"
+    alias klf="kubectl logs -f"
+    alias klp="kubectl logs -p"
+    
+    # kubectl exec
+    alias ke="kubectl exec -it"
+    
+    # kubectl port-forward
+    alias kpf="kubectl port-forward"
+    
+    # kubectl proxy
+    alias kpx="kubectl proxy"
+    
+    # Function to switch kubectl context
+    k-context() {
+        if [[ -z "$1" ]]; then
+            echo "Current context:"
+            kubectl config current-context
+            echo ""
+            echo "Available contexts:"
+            kubectl config get-contexts
+        else
+            kubectl config use-context "$1"
+            echo "Switched to context: $1"
+            kubectl config current-context
+        fi
+    }
+    
+    # Function to switch kubectl namespace
+    k-ns() {
+        if [[ -z "$1" ]]; then
+            echo "Current namespace:"
+            kubectl config view --minify --output 'jsonpath={..namespace}'
+            echo ""
+            echo "Available namespaces:"
+            kubectl get namespaces
+        else
+            kubectl config set-context --current --namespace="$1"
+            echo "Switched to namespace: $1"
+            kubectl config view --minify --output 'jsonpath={..namespace}'
+        fi
+    }
+    
+    # Function to get pod logs with selector
+    k-logs() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: k-logs <pod-selector> [container-name]"
+            echo "Example: k-logs app=nginx"
+            echo "Example: k-logs app=nginx nginx"
+            return 1
+        fi
+        
+        local selector="$1"
+        local container="${2:-}"
+        
+        if [[ -n "$container" ]]; then
+            kubectl logs -l "$selector" -c "$container" -f
+        else
+            kubectl logs -l "$selector" -f
+        fi
+    }
+    
+    # Function to get resource usage
+    k-top() {
+        if command -v kubectl-top >/dev/null 2>&1; then
+            kubectl top "$@"
+        else
+            echo "kubectl top plugin not installed. Install metrics-server first."
+        fi
+    }
+    
+    # Function to scale deployments
+    k-scale() {
+        if [[ $# -lt 2 ]]; then
+            echo "Usage: k-scale <deployment-name> <replicas>"
+            echo "Example: k-scale nginx-deployment 3"
+            return 1
+        fi
+        
+        kubectl scale deployment "$1" --replicas="$2"
+    }
+    
+    # Function to restart deployments
+    k-restart() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: k-restart <deployment-name>"
+            echo "Example: k-restart nginx-deployment"
+            return 1
+        fi
+        
+        kubectl rollout restart deployment "$1"
+    }
+    
+    # Function to check rollout status
+    k-rollout() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: k-rollout <deployment-name>"
+            echo "Example: k-rollout nginx-deployment"
+            return 1
+        fi
+        
+        kubectl rollout status deployment "$1"
+    }
+    
+    # Function to get resource YAML
+    k-yaml() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: k-yaml <resource-type> <resource-name>"
+            echo "Example: k-yaml pod nginx-pod"
+            return 1
+        fi
+        
+        kubectl get "$1" "$2" -o yaml
+    }
+    
+else
+    echo "kubectl not found. Install it to use Kubernetes-related aliases and functions."
+fi
+
+# =============================================================================
+# Helm Configuration
+# =============================================================================
+if command -v helm >/dev/null 2>&1; then
+    # Helm Aliases
+    alias h="helm"
+    alias hi="helm install"
+    alias hu="helm uninstall"
+    alias hu="helm upgrade"
+    alias hl="helm list"
+    alias hls="helm list --all"
+    alias hh="helm history"
+    alias hg="helm get"
+    alias hd="helm dependency"
+    alias hp="helm package"
+    alias ht="helm template"
+    alias htest="helm test"
+    
+    # Function to search Helm charts
+    h-search() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: h-search <chart-name>"
+            echo "Example: h-search nginx"
+            return 1
+        fi
+        
+        helm search repo "$1"
+    }
+    
+    # Function to add Helm repositories
+    h-repo-add() {
+        if [[ $# -lt 2 ]]; then
+            echo "Usage: h-repo-add <repo-name> <repo-url>"
+            echo "Example: h-repo-add bitnami https://charts.bitnami.com/bitnami"
+            return 1
+        fi
+        
+        helm repo add "$1" "$2"
+        helm repo update
+    }
+    
+    # Function to list Helm repositories
+    h-repo-list() {
+        helm repo list
+    }
+    
+    # Function to update Helm repositories
+    h-repo-update() {
+        helm repo update
+    }
+    
+else
+    echo "Helm not found. Install it to use Helm-related aliases and functions."
+fi
+
+# =============================================================================
+# Flux Configuration
+# =============================================================================
+if command -v flux >/dev/null 2>&1; then
+    # Flux Aliases
+    alias fx="flux"
+    alias fxb="flux bootstrap"
+    alias fxc="flux check"
+    alias fxg="flux get"
+    alias fxa="flux apply"
+    alias fxd="flux delete"
+    alias fxs="flux suspend"
+    alias fxr="flux resume"
+    alias fxt="flux trace"
+    alias fxl="flux logs"
+    
+    # Function to check Flux status
+    fx-status() {
+        flux check
+        echo ""
+        echo "Flux resources:"
+        flux get all
+    }
+    
+    # Function to get Flux logs
+    fx-logs() {
+        if [[ -z "$1" ]]; then
+            flux logs --all-namespaces
+        else
+            flux logs -n "$1"
+        fi
+    }
+    
+else
+    echo "Flux not found. Install it to use Flux-related aliases and functions."
+fi
+
+# =============================================================================
+# k9s Configuration
+# =============================================================================
+if command -v k9s >/dev/null 2>&1; then
+    # k9s Aliases
+    alias k9="k9s"
+    alias k9s-ns="k9s --namespace"
+    alias k9s-ctx="k9s --context"
+    
+    # Function to start k9s with specific namespace
+    k9s-namespace() {
+        if [[ -z "$1" ]]; then
+            k9s
+        else
+            k9s --namespace "$1"
+        fi
+    }
+    
+    # Function to start k9s with specific context
+    k9s-context() {
+        if [[ -z "$1" ]]; then
+            k9s
+        else
+            k9s --context "$1"
+        fi
+    }
+    
+else
+    echo "k9s not found. Install it to use k9s-related aliases and functions."
+fi
+
+# =============================================================================
+# Lens Configuration
+# =============================================================================
+if command -v lens >/dev/null 2>&1; then
+    # Lens Aliases
+    alias lens-start="lens"
+    alias lens-connect="lens connect"
+    
+else
+    echo "Lens not found. Install it to use Lens-related aliases and functions."
+fi
+
+# =============================================================================
+# Docker Configuration for Kubernetes
+# =============================================================================
+if command -v docker >/dev/null 2>&1; then
+    # Docker Kubernetes helpers
+    alias dk="docker"
+    alias dk-ps="docker ps"
+    alias dk-images="docker images"
+    alias dk-build="docker build"
+    alias dk-run="docker run"
+    alias dk-stop="docker stop"
+    alias dk-rm="docker rm"
+    alias dk-rmi="docker rmi"
+    
+    # Function to build and push to registry
+    dk-build-push() {
+        if [[ $# -lt 2 ]]; then
+            echo "Usage: dk-build-push <image-name> <tag> [registry]"
+            echo "Example: dk-build-push myapp v1.0.0"
+            echo "Example: dk-build-push myapp v1.0.0 myregistry.com"
+            return 1
+        fi
+        
+        local image_name="$1"
+        local tag="$2"
+        local registry="${3:-}"
+        
+        if [[ -n "$registry" ]]; then
+            local full_image="$registry/$image_name:$tag"
+        else
+            local full_image="$image_name:$tag"
+        fi
+        
+        echo "Building image: $full_image"
+        docker build -t "$full_image" .
+        
+        echo "Pushing image: $full_image"
+        docker push "$full_image"
+    }
+    
+else
+    echo "Docker not found. Install it to use Docker-related aliases and functions."
+fi
+
+# =============================================================================
+# Kubernetes Development Helpers
+# =============================================================================
+# Function to create a new Kubernetes namespace
+k-create-ns() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: k-create-ns <namespace-name>"
+        echo "Example: k-create-ns my-app"
+        return 1
+    fi
+    
+    kubectl create namespace "$1"
+    kubectl config set-context --current --namespace="$1"
+    echo "Created and switched to namespace: $1"
+}
+
+# Function to delete a Kubernetes namespace
+k-delete-ns() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: k-delete-ns <namespace-name>"
+        echo "Example: k-delete-ns my-app"
+        return 1
+    fi
+    
+    kubectl delete namespace "$1"
+}
+
+# Function to get all resources in current namespace
+k-all() {
+    local namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
+    echo "All resources in namespace: $namespace"
+    echo "=================================="
+    
+    echo "Pods:"
+    kubectl get pods
+    echo ""
+    
+    echo "Services:"
+    kubectl get services
+    echo ""
+    
+    echo "Deployments:"
+    kubectl get deployments
+    echo ""
+    
+    echo "ConfigMaps:"
+    kubectl get configmaps
+    echo ""
+    
+    echo "Secrets:"
+    kubectl get secrets
+    echo ""
+    
+    echo "Ingress:"
+    kubectl get ingress
+    echo ""
+}
+
+# Function to clean up completed/failed pods
+k-cleanup() {
+    echo "Cleaning up completed/failed pods..."
+    kubectl delete pods --field-selector=status.phase=Succeeded
+    kubectl delete pods --field-selector=status.phase=Failed
+    echo "Cleanup completed!"
+}
+
+# Function to watch resources
+k-watch() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: k-watch <resource-type> [namespace]"
+        echo "Example: k-watch pods"
+        echo "Example: k-watch pods default"
+        return 1
+    fi
+    
+    local resource="$1"
+    local namespace="${2:-}"
+    
+    if [[ -n "$namespace" ]]; then
+        kubectl get "$resource" -n "$namespace" -w
+    else
+        kubectl get "$resource" -w
+    fi
+} 

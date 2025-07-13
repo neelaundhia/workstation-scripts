@@ -2,7 +2,28 @@
 # Based on fino
 # Use with a dark background and 256-color terminal!
 
-# Color variables for easy customization
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+# Enable/disable features (set to 0 to disable)
+: ${TEZ_SHOW_KUBECTL:=1}
+: ${TEZ_SHOW_GIT_REPO:=1}
+: ${TEZ_SHOW_GIT_STATUS:=1}
+: ${TEZ_SHOW_TIME:=1}
+
+# Symbols (customizable)
+: ${TEZ_SYMBOL_GIT:="⎇"}
+: ${TEZ_SYMBOL_KUBECTL:="⎈"}
+: ${TEZ_SYMBOL_DIRTY:="✘✘✘"}
+: ${TEZ_SYMBOL_CLEAN:="✔"}
+: ${TEZ_SYMBOL_PROMPT:="➤"}
+
+# =============================================================================
+# COLOR DEFINITIONS
+# =============================================================================
+
+# Use consistent color syntax
 local COLOR_USERNAME=040        # Bright green for username
 local COLOR_AT_SYMBOL=239       # Dark gray for @ symbol
 local COLOR_HOSTNAME=033        # Blue for hostname
@@ -13,12 +34,41 @@ local COLOR_GIT_DIRTY=202       # Orange/red for dirty status
 local COLOR_GIT_CLEAN=040       # Bright green for clean status
 local COLOR_GIT_REPO=226        # Light blue for repository name
 local COLOR_KUBECTL=081         # Cyan for kubectl context
+local COLOR_TIME=240            # Dark gray for time
+local COLOR_EXIT_CODE=202       # Red for non-zero exit codes
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+# Check if command exists (more efficient than command -v)
+function _tez_cmd_exists {
+  (( ${+commands[$1]} ))
+}
+
+# Safe command execution with fallback
+function _tez_safe_cmd {
+  local cmd="$1"
+  local fallback="$2"
+  
+  if _tez_cmd_exists "$cmd"; then
+    eval "$cmd"
+  elif [[ -n "$fallback" ]]; then
+    eval "$fallback"
+  fi
+}
+
+# =============================================================================
+# PROMPT COMPONENTS
+# =============================================================================
 
 function kubectl_prompt_info {
-  # Check if kubectl is available.
-  command -v kubectl &>/dev/null || return
+  [[ $TEZ_SHOW_KUBECTL -eq 0 ]] && return
   
-  # Get current context.
+  # Check if kubectl is available
+  _tez_cmd_exists kubectl || return
+  
+  # Get current context (with error suppression)
   local context=$(kubectl config current-context 2>/dev/null)
   [[ -z "$context" ]] && return
   
@@ -27,6 +77,8 @@ function kubectl_prompt_info {
 }
 
 function git_repo_info {
+  [[ $TEZ_SHOW_GIT_REPO -eq 0 ]] && return
+  
   # Check if we're in a git repository
   if git rev-parse --is-inside-work-tree &>/dev/null; then
     # Get the git repository root
@@ -53,8 +105,8 @@ function custom_pwd {
     # Get the git repository root
     local git_root=$(git rev-parse --show-toplevel 2>/dev/null)
     if [[ -n "$git_root" ]]; then
-      # Get relative path from git root
-      local relative_path=$(realpath --relative-to="$git_root" "$PWD" 2>/dev/null)
+      # Get relative path from git root (with fallback)
+      local relative_path=$(_tez_safe_cmd "realpath --relative-to=\"$git_root\" \"$PWD\" 2>/dev/null" "echo \".\"")
       
       # If we're at the root of the repository
       if [[ "$relative_path" == "." ]]; then
@@ -92,30 +144,54 @@ function custom_pwd {
   fi
 }
 
-# Locals for composing the prompt.
+function exit_code_prompt {
+  local exit_code=$?
+  if [[ $exit_code -ne 0 ]]; then
+    echo "%{$FG[$COLOR_EXIT_CODE]%}✗ $exit_code%{$reset_color%}"
+  fi
+}
+
+function time_prompt {
+  [[ $TEZ_SHOW_TIME -eq 0 ]] && return
+  echo "%{$FG[$COLOR_TIME]%}%D{%H:%M:%S}%{$reset_color%}"
+}
+
+# =============================================================================
+# PROMPT COMPOSITION
+# =============================================================================
+
+# Locals for composing the prompt
 local git_info='$(git_prompt_info)'
 local git_repo='$(git_repo_info)'
 local kubectl_info='$(kubectl_prompt_info)'
 local custom_path='$(custom_pwd)'
+local exit_code='$(exit_code_prompt)'
+local time_display='$(time_prompt)'
 
 # Color helpers for readability
-local user_host="${FG[$COLOR_USERNAME]}%n${FG[$COLOR_AT_SYMBOL]}@${FG[$COLOR_HOSTNAME]}$HOST"
-local path_display="%B${FG[$COLOR_PATH]} ${custom_path}%b"
+local user_host="%{$FG[$COLOR_USERNAME]%}%n%{$FG[$COLOR_AT_SYMBOL]%}@%{$FG[$COLOR_HOSTNAME]%}$HOST"
+local path_display="%B%{$FG[$COLOR_PATH]%} ${custom_path}%b"
 local reset="%{$reset_color%}"
 
 # The glorious prompt! (Multi-line for readability)
 PROMPT="╭─${user_host}${kubectl_info}${reset}
 ├─o ${git_info}${git_repo}${path_display}
-╰─➤${reset} "
+╰─${TEZ_SYMBOL_PROMPT}${reset} "
 
-# Environment Variables
-ZSH_THEME_GIT_PROMPT_PREFIX="${FG[$COLOR_GIT_PREFIX]}⎇ %{$reset_color%} ${FG[$COLOR_GIT_BRANCH]}"
+# Right prompt with time and exit code
+RPROMPT="${time_display} ${exit_code}"
+
+# =============================================================================
+# ENVIRONMENT VARIABLES
+# =============================================================================
+
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[$COLOR_GIT_PREFIX]%}${TEZ_SYMBOL_GIT} %{$reset_color%} %{$FG[$COLOR_GIT_BRANCH]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIRTY="${FG[$COLOR_GIT_DIRTY]} ✘✘✘"
-ZSH_THEME_GIT_PROMPT_CLEAN="${FG[$COLOR_GIT_CLEAN]} ✔"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[$COLOR_GIT_DIRTY]%} ${TEZ_SYMBOL_DIRTY}"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$FG[$COLOR_GIT_CLEAN]%} ${TEZ_SYMBOL_CLEAN}"
 
-ZSH_THEME_GIT_REPO_PREFIX="${FG[$COLOR_GIT_PREFIX]} ${FG[$COLOR_GIT_REPO]}["
+ZSH_THEME_GIT_REPO_PREFIX="%{$FG[$COLOR_GIT_PREFIX]%} %{$FG[$COLOR_GIT_REPO]%}["
 ZSH_THEME_GIT_REPO_SUFFIX="]%{$reset_color%}"
 
-ZSH_THEME_KUBECTL_PREFIX="${FG[$COLOR_GIT_PREFIX]} ⎈ ${FG[$COLOR_KUBECTL]}"
+ZSH_THEME_KUBECTL_PREFIX="%{$FG[$COLOR_GIT_PREFIX]%} ${TEZ_SYMBOL_KUBECTL} %{$FG[$COLOR_KUBECTL]%}"
 ZSH_THEME_KUBECTL_SUFFIX="%{$reset_color%}"

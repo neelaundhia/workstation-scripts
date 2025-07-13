@@ -1,0 +1,17 @@
+name: Test Workstation Scripts
+
+on: [push, pull_request]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bash install.sh --list
+
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: brew install bash || true
+      - run: bash install.sh --list

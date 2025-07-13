@@ -1,0 +1,455 @@
+# =============================================================================
+# Development Tools Configuration
+# =============================================================================
+# This file contains configurations for development tools and languages
+# including Docker, Python, Node.js, Go, and other development utilities.
+# =============================================================================
+
+# =============================================================================
+# Docker Configuration
+# =============================================================================
+if command -v docker >/dev/null 2>&1; then
+    # Docker Aliases
+    alias d="docker"
+    alias dps="docker ps"
+    alias dpsa="docker ps -a"
+    alias di="docker images"
+    alias drmi="docker rmi"
+    alias drm="docker rm"
+    alias dst="docker stop"
+    alias dstp="docker start"
+    alias drst="docker restart"
+    alias dex="docker exec -it"
+    alias dlg="docker logs"
+    alias dlfg="docker logs -f"
+    alias dcp="docker cp"
+    alias dinfo="docker info"
+    alias dsys="docker system"
+    alias dvol="docker volume"
+    alias dnet="docker network"
+    
+    # Docker Compose Aliases
+    if command -v docker-compose >/dev/null 2>&1; then
+        alias dc="docker-compose"
+        alias dcup="docker-compose up"
+        alias dcd="docker-compose down"
+        alias dcb="docker-compose build"
+        alias dcr="docker-compose restart"
+        alias dcl="docker-compose logs"
+        alias dclf="docker-compose logs -f"
+        alias dce="docker-compose exec"
+    fi
+    
+    # Docker Buildx Aliases
+    if command -v docker-buildx >/dev/null 2>&1; then
+        alias dbx="docker buildx"
+        alias dbxb="docker buildx build"
+    fi
+    
+    # Function to clean up Docker resources
+    d-cleanup() {
+        echo "Cleaning up Docker resources..."
+        docker system prune -f
+        docker volume prune -f
+        docker network prune -f
+        echo "Docker cleanup completed!"
+    }
+    
+    # Function to remove all stopped containers
+    d-clean-containers() {
+        echo "Removing all stopped containers..."
+        docker container prune -f
+    }
+    
+    # Function to remove all unused images
+    d-clean-images() {
+        echo "Removing all unused images..."
+        docker image prune -a -f
+    }
+    
+    # Function to build and run a container
+    d-build-run() {
+        if [[ $# -lt 2 ]]; then
+            echo "Usage: d-build-run <image-name> <container-name> [port]"
+            echo "Example: d-build-run myapp myapp-container 8080"
+            return 1
+        fi
+        
+        local image_name="$1"
+        local container_name="$2"
+        local port="${3:-}"
+        
+        echo "Building image: $image_name"
+        docker build -t "$image_name" .
+        
+        if [[ -n "$port" ]]; then
+            echo "Running container: $container_name on port $port"
+            docker run -d --name "$container_name" -p "$port:$port" "$image_name"
+        else
+            echo "Running container: $container_name"
+            docker run -d --name "$container_name" "$image_name"
+        fi
+    }
+    
+    # Function to get container IP
+    d-ip() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: d-ip <container-name>"
+            return 1
+        fi
+        
+        docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1"
+    }
+    
+    # Function to enter a running container
+    d-bash() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: d-bash <container-name>"
+            return 1
+        fi
+        
+        docker exec -it "$1" /bin/bash
+    }
+    
+    # Function to enter a running container with sh
+    d-sh() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: d-sh <container-name>"
+            return 1
+        fi
+        
+        docker exec -it "$1" /bin/sh
+    }
+    
+else
+    echo "Docker not found. Install it to use Docker-related aliases and functions."
+fi
+
+# =============================================================================
+# Python Configuration
+# =============================================================================
+if command -v python3 >/dev/null 2>&1; then
+    # Python Aliases
+    alias py="python3"
+    alias py2="python2"
+    alias pip="pip3"
+    alias pip2="pip2"
+    alias venv="python3 -m venv"
+    
+    # Function to create and activate virtual environment
+    py-venv() {
+        if [[ -z "$1" ]]; then
+            local venv_name="venv"
+        else
+            local venv_name="$1"
+        fi
+        
+        echo "Creating virtual environment: $venv_name"
+        python3 -m venv "$venv_name"
+        
+        echo "Activating virtual environment..."
+        source "$venv_name/bin/activate"
+        
+        echo "Upgrading pip..."
+        pip install --upgrade pip
+    }
+    
+    # Function to activate existing virtual environment
+    py-activate() {
+        if [[ -f "venv/bin/activate" ]]; then
+            source venv/bin/activate
+        elif [[ -f ".venv/bin/activate" ]]; then
+            source .venv/bin/activate
+        else
+            echo "No virtual environment found in current directory"
+            return 1
+        fi
+    }
+    
+    # Function to install requirements
+    py-install() {
+        if [[ -f "requirements.txt" ]]; then
+            pip install -r requirements.txt
+        else
+            echo "No requirements.txt found"
+            return 1
+        fi
+    }
+    
+    # Function to run Python server
+    py-serve() {
+        local port="${1:-8000}"
+        echo "Starting Python HTTP server on port $port..."
+        python3 -m http.server "$port"
+    }
+    
+else
+    echo "Python3 not found. Install it to use Python-related aliases and functions."
+fi
+
+# =============================================================================
+# Node.js Configuration
+# =============================================================================
+if command -v node >/dev/null 2>&1; then
+    # Node.js Aliases
+    alias n="node"
+    alias npm="npm"
+    alias npx="npx"
+    
+    # Function to create new Node.js project
+    node-init() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: node-init <project-name>"
+            return 1
+        fi
+        
+        local project_name="$1"
+        
+        echo "Creating Node.js project: $project_name"
+        mkdir "$project_name" && cd "$project_name"
+        npm init -y
+        
+        echo "Project created successfully!"
+    }
+    
+    # Function to install Node.js dependencies
+    node-install() {
+        if [[ -f "package.json" ]]; then
+            npm install
+        else
+            echo "No package.json found"
+            return 1
+        fi
+    }
+    
+    # Function to run Node.js development server
+    node-dev() {
+        if [[ -f "package.json" ]]; then
+            if grep -q "dev" package.json; then
+                npm run dev
+            else
+                echo "No dev script found in package.json"
+                return 1
+            fi
+        else
+            echo "No package.json found"
+            return 1
+        fi
+    }
+    
+    # Function to run Node.js tests
+    node-test() {
+        if [[ -f "package.json" ]]; then
+            if grep -q "test" package.json; then
+                npm test
+            else
+                echo "No test script found in package.json"
+                return 1
+            fi
+        else
+            echo "No package.json found"
+            return 1
+        fi
+    }
+    
+else
+    echo "Node.js not found. Install it to use Node.js-related aliases and functions."
+fi
+
+# =============================================================================
+# Go Configuration
+# =============================================================================
+if command -v go >/dev/null 2>&1; then
+    # Go Aliases
+    alias g="go"
+    alias gb="go build"
+    alias gr="go run"
+    alias gt="go test"
+    alias gf="go fmt"
+    alias gv="go vet"
+    alias gd="go doc"
+    alias gi="go install"
+    alias gm="go mod"
+    
+    # Function to create new Go project
+    go-init() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: go-init <project-name>"
+            return 1
+        fi
+        
+        local project_name="$1"
+        
+        echo "Creating Go project: $project_name"
+        mkdir "$project_name" && cd "$project_name"
+        go mod init "$project_name"
+        
+        echo "Project created successfully!"
+    }
+    
+    # Function to run Go tests with coverage
+    go-test-cov() {
+        go test -coverprofile=coverage.out ./...
+        go tool cover -html=coverage.out -o coverage.html
+        echo "Coverage report generated: coverage.html"
+    }
+    
+    # Function to clean Go cache
+    go-clean() {
+        go clean -cache -modcache -testcache
+        echo "Go cache cleaned!"
+    }
+    
+else
+    echo "Go not found. Install it to use Go-related aliases and functions."
+fi
+
+# =============================================================================
+# Git Configuration
+# =============================================================================
+if command -v git >/dev/null 2>&1; then
+    # Git Aliases
+    alias g="git"
+    alias gs="git status"
+    alias ga="git add"
+    alias gc="git commit"
+    alias gp="git push"
+    alias gl="git log"
+    alias gd="git diff"
+    alias gco="git checkout"
+    alias gcb="git checkout -b"
+    alias gpl="git pull"
+    alias gf="git fetch"
+    alias gb="git branch"
+    alias gst="git stash"
+    alias gstp="git stash pop"
+    alias gr="git remote"
+    alias grv="git remote -v"
+    
+    # Function to create new Git repository
+    git-init() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: git-init <repo-name>"
+            return 1
+        fi
+        
+        local repo_name="$1"
+        
+        echo "Creating Git repository: $repo_name"
+        mkdir "$repo_name" && cd "$repo_name"
+        git init
+        
+        echo "Repository created successfully!"
+    }
+    
+    # Function to clone and setup repository
+    git-clone-setup() {
+        if [[ -z "$1" ]]; then
+            echo "Usage: git-clone-setup <repo-url>"
+            return 1
+        fi
+        
+        local repo_url="$1"
+        local repo_name=$(basename "$repo_url" .git)
+        
+        echo "Cloning repository: $repo_name"
+        git clone "$repo_url"
+        cd "$repo_name"
+        
+        echo "Repository cloned and setup successfully!"
+    }
+    
+    # Function to show Git log with graph
+    git-log-graph() {
+        git log --graph --oneline --all --decorate
+    }
+    
+    # Function to show Git status in short format
+    git-status-short() {
+        git status --short
+    }
+    
+else
+    echo "Git not found. Install it to use Git-related aliases and functions."
+fi
+
+# =============================================================================
+# Development Utilities
+# =============================================================================
+# Function to create a new project directory
+new-project() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: new-project <project-name>"
+        return 1
+    fi
+    
+    local project_name="$1"
+    
+    echo "Creating project: $project_name"
+    mkdir "$project_name" && cd "$project_name"
+    
+    echo "Project created successfully!"
+}
+
+# Function to find files by content
+grep-files() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: grep-files <search-term>"
+        return 1
+    fi
+    
+    grep -r "$1" . --exclude-dir={.git,node_modules,venv,.venv}
+}
+
+# Function to find and replace in files
+replace-in-files() {
+    if [[ $# -lt 2 ]]; then
+        echo "Usage: replace-in-files <search-term> <replace-term>"
+        return 1
+    fi
+    
+    local search_term="$1"
+    local replace_term="$2"
+    
+    find . -type f -name "*.py" -o -name "*.js" -o -name "*.go" -o -name "*.sh" | \
+    xargs sed -i "s/$search_term/$replace_term/g"
+}
+
+# Function to show disk usage by directory
+disk-usage() {
+    if [[ -z "$1" ]]; then
+        du -sh ./*
+    else
+        du -sh "$1"
+    fi
+}
+
+# Function to show file count by extension
+file-count() {
+    find . -type f | sed 's/.*\.//' | sort | uniq -c | sort -nr
+}
+
+# Function to create backup of current directory
+backup() {
+    local backup_name="backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+    tar -czf "$backup_name" .
+    echo "Backup created: $backup_name"
+}
+
+# Function to extract backup
+restore() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: restore <backup-file>"
+        return 1
+    fi
+    
+    local backup_file="$1"
+    
+    if [[ -f "$backup_file" ]]; then
+        tar -xzf "$backup_file"
+        echo "Backup restored from: $backup_file"
+    else
+        echo "Backup file not found: $backup_file"
+        return 1
+    fi
+} 

@@ -1,0 +1,13 @@
+FROM alpine:3.19
+
+RUN apk add --no-cache bash sudo curl unzip tar ca-certificates gnupg lsb-release git sed grep coreutils shadow
+
+RUN adduser -D tester && echo "tester ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+USER tester
+WORKDIR /home/tester/workspace
+
+COPY . .
+
+RUN chmod +x install.sh scripts/**/*.sh || true
+
+CMD ["bash", "install.sh", "--list"] 
