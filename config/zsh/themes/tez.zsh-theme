@@ -13,6 +13,17 @@ local COLOR_GIT_DIRTY=202       # Orange/red for dirty status
 local COLOR_GIT_CLEAN=040       # Bright green for clean status
 local COLOR_GIT_REPO=226        # Light blue for repository name
 local COLOR_KUBECTL=081         # Cyan for kubectl context
+local COLOR_NODE=070            # Greenish for Node.js version
+
+function node_prompt_info {
+  # Check if node is available.
+  command -v node &>/dev/null || return
+  # Get current Node.js version
+  local node_version=$(node -v 2>/dev/null)
+  [[ -z "$node_version" ]] && return
+  # Format the output
+  echo "${ZSH_THEME_NODE_PREFIX}${node_version}${ZSH_THEME_NODE_SUFFIX}"
+}
 
 function kubectl_prompt_info {
   # Check if kubectl is available.
@@ -96,6 +107,7 @@ function custom_pwd {
 local git_info='$(git_prompt_info)'
 local git_repo='$(git_repo_info)'
 local kubectl_info='$(kubectl_prompt_info)'
+local node_info='$(node_prompt_info)'
 local custom_path='$(custom_pwd)'
 
 # Color helpers for readability
@@ -103,8 +115,7 @@ local user_host="${FG[$COLOR_USERNAME]}%n${FG[$COLOR_AT_SYMBOL]}@${FG[$COLOR_HOS
 local path_display="%B${FG[$COLOR_PATH]} ${custom_path}%b"
 local reset="%{$reset_color%}"
 
-# The glorious prompt! (Multi-line for readability)
-PROMPT="╭─${user_host}${kubectl_info}${reset}
+PROMPT="╭─${user_host}${kubectl_info}${node_info}${reset}
 ├─o ${git_info}${git_repo}${path_display}
 ╰─➤${reset} "
 
@@ -119,3 +130,6 @@ ZSH_THEME_GIT_REPO_SUFFIX="]%{$reset_color%}"
 
 ZSH_THEME_KUBECTL_PREFIX="${FG[$COLOR_GIT_PREFIX]} ⎈ ${FG[$COLOR_KUBECTL]}"
 ZSH_THEME_KUBECTL_SUFFIX="%{$reset_color%}"
+
+ZSH_THEME_NODE_PREFIX="${FG[$COLOR_GIT_PREFIX]} ⬢ ${FG[$COLOR_NODE]}"
+ZSH_THEME_NODE_SUFFIX="%{$reset_color%}"
