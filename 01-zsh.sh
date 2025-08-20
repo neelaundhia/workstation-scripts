@@ -2,7 +2,7 @@
 
 # Install ZSH
 sudo apt update
-sudo apt install curl zsh -y
+sudo apt install curl sed zsh -y
 
 # Install Oh My ZSH
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
