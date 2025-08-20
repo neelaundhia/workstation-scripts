@@ -40,7 +40,7 @@ echo "Downloading aws-cli installer for ${OS}/${ARCH}..."
 curl -O --output-dir ~/tools/aws-cli/ "https://awscli.amazonaws.com/awscli-exe-${OS}-${ARCH}.zip" --create-dirs
 
 # Extract the zip file
-unzip "~/tools/aws-cli/awscli-exe-${OS}-${ARCH}.zip" -d ~/tools/aws-cli/
+unzip ~/tools/aws-cli/awscli-exe-${OS}-${ARCH}.zip -d ~/tools/aws-cli/
 
 # Install aws-cli
 ~/tools/aws-cli/aws/install --bin-dir ~/bin --install-dir ~/tools/aws-cli/ --update
